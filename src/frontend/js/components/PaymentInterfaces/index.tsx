@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect } from 'react';
-import * as Joanie from 'types/Joanie';
+import type * as Joanie from 'types/Joanie';
+import { PaymentProviders } from 'types/Joanie';
 import { handle } from 'utils/errors/handle';
 import { PaymentErrorMessageId } from 'components/PaymentButton';
 
@@ -15,7 +16,7 @@ export interface PaymentProviderInterfaceProps extends Joanie.Payment {
  * `provider` property. Return null if the provider is not supported.
  */
 const PaymentProvider = (props: PaymentProviderInterfaceProps) => {
-  const isNotImplementedProvider = !Object.values<string>(Joanie.PaymentProviders).includes(
+  const isNotImplementedProvider = !Object.values<string>(PaymentProviders).includes(
     props.provider,
   );
 
@@ -31,7 +32,7 @@ const PaymentProvider = (props: PaymentProviderInterfaceProps) => {
 
   return (
     <Suspense fallback={null}>
-      {props.provider === Joanie.PaymentProviders.PAYPLUG && <LazyPayplugLightbox {...props} />}
+      {props.provider === PaymentProviders.PAYPLUG && <LazyPayplugLightbox {...props} />}
     </Suspense>
   );
 };

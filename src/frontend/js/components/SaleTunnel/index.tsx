@@ -1,6 +1,6 @@
 import { Fragment, useState } from 'react';
 import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
-import * as Joanie from 'types/Joanie';
+import type * as Joanie from 'types/Joanie';
 import { Modal } from 'components/Modal';
 import { SaleTunnelStepPayment } from 'components/SaleTunnelStepPayment';
 import { SaleTunnelStepResume } from 'components/SaleTunnelStepResume';

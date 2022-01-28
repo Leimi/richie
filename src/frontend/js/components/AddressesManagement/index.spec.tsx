@@ -10,7 +10,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { REACT_QUERY_SETTINGS, RICHIE_USER_TOKEN } from 'settings';
-import * as Joanie from 'types/Joanie';
+import type * as Joanie from 'types/Joanie';
 import * as mockFactories from 'utils/test/factories';
 import createQueryClient from 'utils/react-query/createQueryClient';
 import { SessionProvider } from 'data/SessionProvider';

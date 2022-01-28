@@ -1,5 +1,4 @@
-import { useEffect, useCallback } from 'react';
-import { usePayment } from 'hooks/usePayment';
+import { useCallback, useEffect } from 'react';
 import { handle } from 'utils/errors/handle';
 import { PaymentErrorMessageId } from 'components/PaymentButton';
 import { PaymentProviderInterfaceProps } from '.';
@@ -10,20 +9,12 @@ import { PaymentProviderInterfaceProps } from '.';
  *
  * https://docs.payplug.com/api/lightbox.html#lightbox
  */
-const PayplugLightbox = ({
-  url,
-  payment_id,
-  onSuccess,
-  onError,
-}: PaymentProviderInterfaceProps) => {
-  const paymentManager = usePayment();
-
+const PayplugLightbox = ({ url, onSuccess, onError }: PaymentProviderInterfaceProps) => {
   const listenPayplugIframeMessage = (event: MessageEvent) => {
     if (typeof event.data === 'string') {
       switch (event.data) {
         case 'closePayPlugFrame':
-          paymentManager.methods.abort(payment_id);
-          onError(PaymentErrorMessageId.ERROR_ABORT);
+          onError(PaymentErrorMessageId.ERROR_ABORTING);
           break;
       }
     } else if (typeof event.data === 'object') {

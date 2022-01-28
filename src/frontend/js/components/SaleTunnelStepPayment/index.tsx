@@ -2,7 +2,7 @@ import { Fragment, useMemo, useState } from 'react';
 import { defineMessages, FormattedMessage, FormattedNumber, useIntl } from 'react-intl';
 import { useSession } from 'data/SessionProvider';
 import { Maybe } from 'types/utils';
-import * as Joanie from 'types/Joanie';
+import type * as Joanie from 'types/Joanie';
 import { useAddresses } from 'hooks/useAddresses';
 import { useCreditCards } from 'hooks/useCreditCards';
 import { RegisteredCreditCard } from 'components/RegisteredCreditCard';

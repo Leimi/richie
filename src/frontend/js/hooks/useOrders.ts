@@ -30,9 +30,19 @@ export const useOrders = () => {
 
   const creationHandler = useMutation(API().user.orders.create, {
     onError: handleError,
+    // TODO What do we do when an order is created
     onSettled: (_, __, variables) => {
-      queryClient.invalidateQueries(QUERY_KEY);
-      queryClient.invalidateQueries(['user', 'course', variables.course]);
+      // queryClient.invalidateQueries(QUERY_KEY);
+      // queryClient.invalidateQueries(['user', 'course', variables.course]);
+    },
+  });
+
+  const abortHandler = useMutation(API().user.orders.abort, {
+    onError: handleError,
+    // TODO What do we do when an order is aborted
+    onSettled: (_, __, variables) => {
+      // queryClient.invalidateQueries(QUERY_KEY);
+      // queryClient.invalidateQueries(['user', 'course', variables.course]);
     },
   });
 
@@ -45,6 +55,7 @@ export const useOrders = () => {
   return {
     items: readHandler.data?.results,
     methods: {
+      abort: abortHandler.mutateAsync,
       create: creationHandler.mutateAsync,
       invalidate,
       prefetch,
@@ -53,6 +64,7 @@ export const useOrders = () => {
     states: {
       fetching: readHandler.isLoading,
       creating: creationHandler.isLoading,
+      aborting: abortHandler.isLoading,
     },
   };
 };

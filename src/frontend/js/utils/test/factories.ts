@@ -1,7 +1,8 @@
 import { compose, createSpec, derived, faker, oneOf } from '@helpscout/helix';
 import { CommonDataProps } from 'types/commonDataProps';
 import { APIBackend } from 'types/api';
-import * as Joanie from 'types/Joanie';
+import type * as Joanie from 'types/Joanie';
+import { EnrollmentState, OrderState, ProductType } from 'types/Joanie';
 import { DehydratedState } from 'react-query/types/hydration';
 import { QueryState } from 'react-query/types/core/query';
 import { MutationState } from 'react-query/types/core/mutation';
@@ -146,7 +147,7 @@ export const JoanieEnrollmentFactory = compose(
   JoanieCourseRunFactory,
   createSpec({
     is_active: true,
-    state: Joanie.EnrollmentState.SET,
+    state: EnrollmentState.SET,
   }),
 );
 
@@ -160,7 +161,7 @@ export const TargetCourseFactory = createSpec({
 export const CertificateProductFactory = createSpec({
   id: faker.datatype.uuid(),
   title: faker.random.words(1, 3),
-  type: Joanie.ProductType.CERTIFICATE,
+  type: ProductType.CERTIFICATE,
   price: faker.datatype.number(),
   price_currency: faker.finance.currencyCode(),
   call_to_action: faker.random.words(1, 3),
@@ -180,7 +181,7 @@ const OrderLiteFactory = createSpec({
   total: faker.datatype.number(),
   total_currency: faker.finance.currencyCode(),
   product: faker.datatype.uuid(),
-  state: Joanie.OrderState.VALIDATED,
+  state: OrderState.VALIDATED,
 });
 
 // TODO Create CredentialProductFactory and EnrollmentProductFactory
@@ -196,7 +197,7 @@ export const ProductOrderFactory = (
       return {
         ...courseRun,
         is_active: true,
-        state: Joanie.EnrollmentState.SET,
+        state: EnrollmentState.SET,
       };
     });
 
@@ -223,7 +224,7 @@ export const OrderFactory = createSpec({
   owner: faker.internet.userName(),
   total: faker.datatype.number(),
   total_currency: faker.finance.currencyCode(),
-  state: Joanie.OrderState.VALIDATED,
+  state: OrderState.VALIDATED,
   product: faker.datatype.uuid(),
   target_courses: TargetCourseFactory.generate(1, 5),
 });

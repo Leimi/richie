@@ -1,5 +1,5 @@
-import { useIntl, FormattedMessage, FormattedNumber, defineMessages } from 'react-intl';
-import * as Joanie from 'types/Joanie';
+import { defineMessages, FormattedMessage, FormattedNumber, useIntl } from 'react-intl';
+import type * as Joanie from 'types/Joanie';
 
 const messages = defineMessages({
   includingVAT: {

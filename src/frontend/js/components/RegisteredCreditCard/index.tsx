@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
-import * as Joanie from 'types/Joanie';
+import type * as Joanie from 'types/Joanie';
 
 const messages = defineMessages({
   inputAriaLabel: {

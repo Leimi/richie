@@ -1,12 +1,13 @@
-import { Fragment, useEffect, useMemo, useState, useRef } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
-import * as Joanie from 'types/Joanie';
+import type * as Joanie from 'types/Joanie';
+import { OrderState } from 'types/Joanie';
 import { Maybe } from 'types/utils';
-import { usePayment } from 'hooks/usePayment';
 import { useCourse } from 'data/CourseProductsProvider';
 import { Spinner } from 'components/Spinner';
 import PaymentInterface from 'components/PaymentInterfaces';
 import API from 'utils/api/joanie';
+import { useOrders } from 'hooks/useOrders';
 
 const messages = defineMessages({
   pay: {
@@ -29,11 +30,17 @@ const messages = defineMessages({
     description: 'Error message shown when user aborts the payment.',
     id: 'components.SaleTunnelStepPayment.errorAbort',
   },
+  errorAborting: {
+    defaultMessage: 'Aborting the payment...',
+    description: 'Error message shown when user asks to abort the payment.',
+    id: 'components.SaleTunnelStepPayment.errorAborting',
+  },
 });
 
 export enum PaymentErrorMessageId {
   ERROR_DEFAULT = 'errorDefault',
   ERROR_ABORT = 'errorAbort',
+  ERROR_ABORTING = 'errorAborting',
 }
 
 interface PaymentButtonProps {
@@ -59,7 +66,7 @@ const PaymentButton = ({ product, billingAddress, creditCard, onSuccess }: Payme
   const intl = useIntl();
   const intervalRef = useRef<NodeJS.Timeout>();
   const { item: course } = useCourse();
-  const paymentManager = usePayment();
+  const orderManager = useOrders();
 
   const isReadyToPay = useMemo(() => {
     return course?.code && product.id && billingAddress;
@@ -77,7 +84,7 @@ const PaymentButton = ({ product, billingAddress, creditCard, onSuccess }: Payme
    */
   const isOrderValidated = async (id: string): Promise<Boolean> => {
     const order = await API().user.orders.get(id);
-    return order?.state === Joanie.OrderState.VALIDATED;
+    return order?.state === OrderState.VALIDATED;
   };
 
   /** type guard to check if the payment is a payment one click */
@@ -91,12 +98,16 @@ const PaymentButton = ({ product, billingAddress, creditCard, onSuccess }: Payme
 
       if (!paymentInfos) {
         try {
-          paymentInfos = await paymentManager.methods.create({
+          const order = await orderManager.methods.create({
             billing_address: billingAddress!,
-            product_id: product.id,
-            course_code: course!.code,
             credit_card_id: creditCard,
+            course: course!.code,
+            product: product.id,
           });
+          paymentInfos = {
+            ...order.payment_info!,
+            order_id: order.id,
+          };
         } catch {
           setState(ComponentStates.ERROR);
         }
@@ -110,7 +121,7 @@ const PaymentButton = ({ product, billingAddress, creditCard, onSuccess }: Payme
     let round = 0;
     intervalRef.current = setInterval(async () => {
       if (round >= 30) {
-        paymentManager.methods.abort((payment as Joanie.Payment).payment_id);
+        orderManager.methods.abort({ id: payment!.order_id, payment_id: payment!.payment_id });
         clearInterval(intervalRef.current!);
         intervalRef.current = undefined;
         setState(ComponentStates.ERROR);
@@ -142,11 +153,28 @@ const PaymentButton = ({ product, billingAddress, creditCard, onSuccess }: Payme
     () => () => {
       if (intervalRef.current !== undefined) {
         clearInterval(intervalRef.current);
-        paymentManager.methods.abort((payment as Joanie.Payment).payment_id);
+        orderManager.methods.abort({
+          id: payment!.order_id,
+          payment_id: payment!.payment_id,
+        });
       }
     },
     [],
   );
+
+  useEffect(() => {
+    if (error === PaymentErrorMessageId.ERROR_ABORTING) {
+      orderManager.methods
+        .abort({
+          id: payment!.order_id,
+          payment_id: payment!.payment_id,
+        })
+        .then(() => {
+          setPayment(undefined);
+          handleError(PaymentErrorMessageId.ERROR_ABORT);
+        });
+    }
+  }, [error]);
 
   return (
     <div className="payment-button">

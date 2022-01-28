@@ -1,10 +1,8 @@
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/anchor-is-valid */
 import { Fragment, useMemo, useState } from 'react';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import { useSelect } from 'downshift';
 import { handle } from 'utils/errors/handle';
-import * as Joanie from 'types/Joanie';
+import type * as Joanie from 'types/Joanie';
 import { Spinner } from 'components/Spinner';
 import API from 'utils/api/joanie';
 
@@ -27,26 +25,27 @@ const messages = defineMessages({
 const PurchasedProductMenu = ({ order }: Props) => {
   const [loading, setLoading] = useState(false);
 
-  const downloadInvoice = async (event: React.MouseEvent<HTMLAnchorElement>) => {
+  const downloadInvoice = async () => {
     try {
       setLoading(true);
-      const $target = event.currentTarget;
-      const file = await API().payments.invoice.get(order.id);
+      const $link = document.createElement('a');
+      const file = await API().user.orders.invoice.download({
+        order_id: order.id,
+        invoice_reference: order.main_invoice,
+      });
       // eslint-disable-next-line compat/compat
       const url = URL.createObjectURL(file);
-      $target.href = url;
-      $target.download = `invoice-${order.id.split('-')[0]}.pdf`;
+      $link.href = url;
+      $link.download = '';
 
       const revokeObject = () => {
         // eslint-disable-next-line compat/compat
         URL.revokeObjectURL(url);
-        $target.removeAttribute('href');
-        $target.removeAttribute('download');
         window.removeEventListener('blur', revokeObject);
       };
 
       window.addEventListener('blur', revokeObject);
-      $target.click();
+      $link.click();
     } catch (error) {
       handle(error);
     } finally {
@@ -108,9 +107,9 @@ const PurchasedProductMenu = ({ order }: Props) => {
             {isOpen &&
               items.map((item, index) => (
                 <li key={item.key} {...getItemProps({ item, index })}>
-                  <a className={selectorItemClasses(index)} onClick={item.action}>
+                  <button className={selectorItemClasses(index)} onClick={item.action}>
                     <FormattedMessage {...messages[item.key]} />
-                  </a>
+                  </button>
                 </li>
               ))}
           </ul>

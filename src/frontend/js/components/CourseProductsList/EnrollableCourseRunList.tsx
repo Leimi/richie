@@ -1,6 +1,6 @@
-import React, { ReactEventHandler, useRef, useState } from 'react';
-import { useIntl, FormattedMessage, defineMessages } from 'react-intl';
-import * as Joanie from 'types/Joanie';
+import React, { Children, ReactEventHandler, useRef, useState } from 'react';
+import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
+import type * as Joanie from 'types/Joanie';
 import { useEnrollment } from 'hooks/useEnrollment';
 import { Spinner } from 'components/Spinner';
 import { useCourse } from 'data/CourseProductsProvider';
@@ -19,7 +19,7 @@ interface EnrollCourseRunListProps extends CourseRunListProps {
   order: Joanie.OrderLite;
 }
 
-const EnrollableCourseRunList = ({ baseKey, courseRuns, order }: EnrollCourseRunListProps) => {
+const EnrollableCourseRunList = ({ courseRuns, order }: EnrollCourseRunListProps) => {
   const intl = useIntl();
   const formRef = useRef<HTMLFormElement>(null);
   const [selectedCourseRun, setSelectedCourseRun] = useState<Maybe<any>>();
@@ -75,29 +75,31 @@ const EnrollableCourseRunList = ({ baseKey, courseRuns, order }: EnrollCourseRun
   return (
     <form ref={formRef} onChange={handleChange}>
       <ol className="course-runs-list">
-        {courseRuns.map((courseRun) => (
-          <li
-            className="course-runs-item course-runs-item form-field"
-            key={`${baseKey}-${courseRun.id}`}
-          >
-            <input
-              className="form-field__radio-input"
-              type="radio"
-              id={`${baseKey}|${courseRun.resource_link}`}
-              name={baseKey}
-            />
-            <label className="form-field__label" htmlFor={`${baseKey}|${courseRun.resource_link}`}>
-              <span className="form-field__radio-control" />
-              <em className="course-runs-item__date course-runs-item__date--start">
-                {formatDate(courseRun.start)}
-              </em>
-              <span className="course-runs-item__date-separator" />
-              <em className="course-runs-item__date course-runs-item__date--end">
-                {formatDate(courseRun.end)}
-              </em>
-            </label>
-          </li>
-        ))}
+        {Children.toArray(
+          courseRuns.map((courseRun) => (
+            <li className="course-runs-item course-runs-item form-field">
+              <input
+                className="form-field__radio-input"
+                type="radio"
+                id={`${order.id}|${courseRun.resource_link}`}
+                name={order.id}
+              />
+              <label
+                className="form-field__label"
+                htmlFor={`${order.id}|${courseRun.resource_link}`}
+              >
+                <span className="form-field__radio-control" />
+                <em className="course-runs-item__date course-runs-item__date--start">
+                  {formatDate(courseRun.start)}
+                </em>
+                <span className="course-runs-item__date-separator" />
+                <em className="course-runs-item__date course-runs-item__date--end">
+                  {formatDate(courseRun.end)}
+                </em>
+              </label>
+            </li>
+          )),
+        )}
         <li className="course-runs-item">
           <button
             className="course-runs-item__cta button--primary button--pill button--tiny"

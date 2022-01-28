@@ -7,13 +7,13 @@ import {
   CertificateProductFactory,
   ContextFactory as mockContextFactory,
   CourseFactory,
-  PersistedClientFactory,
-  ProductOrderFactory,
-  ProductFactory,
-  QueryStateFactory,
   FonzieUserFactory,
+  PersistedClientFactory,
+  ProductFactory,
+  ProductOrderFactory,
+  QueryStateFactory,
 } from 'utils/test/factories';
-import * as Joanie from 'types/Joanie';
+import type * as Joanie from 'types/Joanie';
 import { Deferred } from 'utils/test/deferred';
 import createQueryClient from 'utils/react-query/createQueryClient';
 import { REACT_QUERY_SETTINGS, RICHIE_USER_TOKEN } from 'settings';

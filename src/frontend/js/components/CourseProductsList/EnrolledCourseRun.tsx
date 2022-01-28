@@ -2,7 +2,7 @@ import { useIntl } from 'react-intl';
 import { Spinner } from 'components/Spinner';
 import { useEnrollment } from 'hooks/useEnrollment';
 import { useCourse } from 'data/CourseProductsProvider';
-import * as Joanie from 'types/Joanie';
+import type * as Joanie from 'types/Joanie';
 
 const EnrolledCourseRun = ({ courseRun }: { courseRun: Joanie.CourseRunEnrollment }) => {
   const intl = useIntl();

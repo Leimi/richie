@@ -3,7 +3,7 @@ import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import countries from 'i18n-iso-countries';
-import * as Joanie from 'types/Joanie';
+import type * as Joanie from 'types/Joanie';
 import { Maybe } from 'types/utils';
 import { confirm } from 'utils/indirection/window';
 import { useAddresses } from 'hooks/useAddresses';

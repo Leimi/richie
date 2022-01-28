@@ -72,7 +72,14 @@ export interface CourseProductTargetCourse {
 
 export type OrderLite = Pick<
   Order,
-  'id' | 'created_on' | 'state' | 'total' | 'enrollments' | 'product'
+  | 'id'
+  | 'created_on'
+  | 'state'
+  | 'total'
+  | 'enrollments'
+  | 'product'
+  | 'main_invoice'
+  | 'certificate'
 >;
 
 export interface CourseProduct extends Product {
@@ -115,6 +122,8 @@ export interface Order {
   course: string;
   created_on: string;
   enrollments: Enrollment[];
+  main_invoice: string;
+  certificate: string;
   owner: string;
   total: number;
   total_currency: string;
@@ -178,6 +187,13 @@ interface AddressCreationPayload extends Omit<Address, 'id' | 'is_main'> {
 interface OrderCreationPayload {
   product: Product['id'];
   course: Course['code'];
+  billing_address?: Omit<Address, 'id' | 'is_main'>;
+  credit_card_id?: CreditCard['id'];
+}
+
+interface OrderAbortPayload {
+  id: Order['id'];
+  payment_id?: Payment['payment_id'];
 }
 
 interface EnrollmentCreationPayload {
@@ -206,31 +222,24 @@ interface APIUser {
     update(payload: CreditCard): Promise<CreditCard>;
   };
   orders: {
-    create(payload: OrderCreationPayload): Promise<Order>;
+    abort(payload: OrderAbortPayload): Promise<void>;
+    create(
+      payload: OrderCreationPayload,
+    ): Promise<Order & { payment_info?: Payment | PaymentOneClick }>;
     get(id: Order['id']): Promise<Nullable<Order>>;
     get(queryParameters?: QueryParameters): Promise<PaginatedResponse<Nullable<Order>>>;
+    invoice: {
+      download(payload: { order_id: Order['id']; invoice_reference: string }): Promise<File>;
+    };
   };
-  certificates: {};
+  certificates: {
+    download(id: string): Promise<File>;
+  };
   enrollments: {
     create(payload: EnrollmentCreationPayload): Promise<any>;
     get(id: Enrollment['id']): Promise<Enrollment>;
     get(queryParameters?: QueryParameters): Promise<PaginatedResponse<Enrollment>>;
     update(payload: EnrollmentUpdatePayload): Promise<any>;
-  };
-}
-
-interface PaymentCreationPayload {
-  product_id: Product['id'];
-  course_code: Course['code'];
-  billing_address: Omit<Address, 'id' | 'is_main'>;
-  credit_card_id?: CreditCard['id'];
-}
-
-interface APIPayment {
-  abort: (payment_id: string) => Promise<void>;
-  create: (payload: PaymentCreationPayload) => Promise<Payment | PaymentOneClick>;
-  invoice: {
-    get: (orderId: string) => Promise<File>;
   };
 }
 
@@ -240,7 +249,6 @@ export interface API {
     get(id: string): Promise<Course>;
   };
   courseRuns: {};
-  payments: APIPayment;
 }
 
 export interface Backend {

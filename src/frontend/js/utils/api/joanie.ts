@@ -6,7 +6,7 @@
  *
  */
 import { stringify } from 'query-string';
-import * as Joanie from 'types/Joanie';
+import type * as Joanie from 'types/Joanie';
 import context from 'utils/context';
 import { AuthenticationApi } from 'utils/api/authentication';
 import { handle } from 'utils/errors/handle';
@@ -52,7 +52,7 @@ function getDefaultHeaders(): Record<string, string> {
 function fetchWithJWT(routes: RequestInfo, options: RequestInit = {}) {
   try {
     const accessToken = AuthenticationApi!.accessToken!();
-    const headers = (options.headers as Record<string, string>) || {};
+    const headers = (options.headers as Record<string, string>) || getDefaultHeaders();
 
     if (accessToken) {
       // eslint-disable-next-line @typescript-eslint/dot-notation
@@ -115,11 +115,15 @@ const API = (): Joanie.API => {
         delete: configuration.endpoint.concat('/api/addresses/:id/'),
       },
       orders: {
+        abort: configuration.endpoint.concat('/api/orders/:id/abort/'),
         create: configuration.endpoint.concat('/api/orders/'),
         get: configuration.endpoint.concat('/api/orders/:id/'),
+        invoice: {
+          download: configuration.endpoint.concat('/api/orders/:id/invoice/'),
+        },
       },
       certificates: {
-        // TODO Add Joanie certificate routes
+        download: configuration.endpoint.concat('/api/certificates/:id/download/'),
       },
       enrollments: {
         get: configuration.endpoint.concat('/api/enrollments/:id/'),
@@ -133,13 +137,6 @@ const API = (): Joanie.API => {
     courseRuns: {
       // TODO Add Joanie course run routes
     },
-    payments: {
-      abort: configuration.endpoint.concat('/api/payments/abort/'),
-      create: configuration.endpoint.concat('/api/payments/create/'),
-      invoice: {
-        get: configuration.endpoint.concat('/api/payments/invoice/:order_id'),
-      },
-    },
   };
 
   return {
@@ -151,16 +148,11 @@ const API = (): Joanie.API => {
           if (id) url = ROUTES.user.creditCards.get.replace(':id', id);
           else url = ROUTES.user.creditCards.get.replace(':id/', '');
 
-          return fetchWithJWT(url, {
-            headers: getDefaultHeaders(),
-          })
-            .then(checkStatus)
-            .catch(handleError([]));
+          return fetchWithJWT(url).then(checkStatus).catch(handleError([]));
         },
         create: async (creditCard) =>
           fetchWithJWT(ROUTES.user.creditCards.create, {
             method: 'POST',
-            headers: getDefaultHeaders(),
             body: JSON.stringify(creditCard),
           })
             .then(checkStatus)
@@ -168,7 +160,6 @@ const API = (): Joanie.API => {
         update: async ({ id, ...creditCard }) =>
           fetchWithJWT(ROUTES.user.creditCards.create.replace(':id', id), {
             method: 'PUT',
-            headers: getDefaultHeaders(),
             body: JSON.stringify(creditCard),
           })
             .then(checkStatus)
@@ -176,7 +167,6 @@ const API = (): Joanie.API => {
         delete: async (id) =>
           fetchWithJWT(ROUTES.user.creditCards.create.replace(':id', id), {
             method: 'DELETE',
-            headers: getDefaultHeaders(),
           })
             .then(checkStatus)
             .catch(handleError()),
@@ -188,16 +178,11 @@ const API = (): Joanie.API => {
           if (id) url = ROUTES.user.addresses.get.replace(':id', id);
           else url = ROUTES.user.addresses.get.replace(':id/', '');
 
-          return fetchWithJWT(url, {
-            headers: getDefaultHeaders(),
-          })
-            .then(checkStatus)
-            .catch(handleError([]));
+          return fetchWithJWT(url).then(checkStatus).catch(handleError([]));
         },
         create: async (payload) =>
           fetchWithJWT(ROUTES.user.addresses.create, {
             method: 'POST',
-            headers: getDefaultHeaders(),
             body: JSON.stringify(payload),
           })
             .then(checkStatus)
@@ -205,7 +190,6 @@ const API = (): Joanie.API => {
         update: async ({ id, ...address }) =>
           fetchWithJWT(ROUTES.user.addresses.update.replace(':id', id), {
             method: 'PUT',
-            headers: getDefaultHeaders(),
             body: JSON.stringify(address),
           })
             .then(checkStatus)
@@ -213,16 +197,22 @@ const API = (): Joanie.API => {
         delete: async (id) =>
           fetchWithJWT(ROUTES.user.addresses.delete.replace(':id', id), {
             method: 'DELETE',
-            headers: getDefaultHeaders(),
           })
             .then(checkStatus)
             .catch(handleError()),
       },
       orders: {
+        abort: async ({ id, payment_id }) => {
+          fetchWithJWT(ROUTES.user.orders.abort.replace(':id', id), {
+            method: 'POST',
+            body: payment_id ? JSON.stringify({ payment_id }) : undefined,
+          })
+            .then(checkStatus)
+            .catch(handleError());
+        },
         create: async (payload) =>
           fetchWithJWT(ROUTES.user.orders.create, {
             method: 'POST',
-            headers: getDefaultHeaders(),
             body: JSON.stringify(payload),
           }).then(checkStatus),
         get: async (arg1) => {
@@ -242,12 +232,19 @@ const API = (): Joanie.API => {
 
           return fetchWithJWT(url).then(checkStatus).catch(handleError(null));
         },
+        invoice: {
+          download: async ({ order_id, invoice_reference }) => {
+            const url = new URL(ROUTES.user.orders.invoice.download.replace(':id', order_id));
+            url.search = stringify({ reference: invoice_reference });
+
+            return fetchWithJWT(url.toString()).then(checkStatus).catch(handleError());
+          },
+        },
       },
       enrollments: {
         create: async (payload) =>
           fetchWithJWT(ROUTES.user.enrollments.create, {
             method: 'POST',
-            headers: getDefaultHeaders(),
             body: JSON.stringify(payload),
           }).then(checkStatus),
         get: async (arg1) => {
@@ -270,51 +267,27 @@ const API = (): Joanie.API => {
         update: async ({ id, ...payload }) =>
           fetchWithJWT(ROUTES.user.enrollments.update.replace(':id', id), {
             method: 'PUT', // MARK or PATCH ?
-            headers: getDefaultHeaders(),
             body: JSON.stringify(payload),
           })
             .then(checkStatus)
             .catch(handleError()),
       },
-      certificates: {},
+      certificates: {
+        download: async (id: string): Promise<File> =>
+          fetchWithJWT(ROUTES.user.certificates.download.replace(':id', id))
+            .then(checkStatus)
+            .catch(handleError()),
+      },
     },
     courses: {
       get: async (id) =>
-        fetchWithJWT(ROUTES.courses.get.replace(':id', id), {
-          headers: getDefaultHeaders(),
-        })
+        fetchWithJWT(ROUTES.courses.get.replace(':id', id))
           .then((response) =>
             checkStatus(response, { fallbackValue: null, ignoredErrorStatus: [404] }),
           )
           .catch(handleError()),
     },
     courseRuns: {},
-    payments: {
-      abort: async (payment_id: string) =>
-        fetchWithJWT(ROUTES.payments.abort, {
-          method: 'POST',
-          headers: getDefaultHeaders(),
-          body: JSON.stringify({ id: payment_id }),
-        })
-          .then(checkStatus)
-          .catch(handleError()),
-      create: async (payload) =>
-        fetchWithJWT(ROUTES.payments.create, {
-          method: 'POST',
-          headers: getDefaultHeaders(),
-          body: JSON.stringify(payload),
-        })
-          .then(checkStatus)
-          .catch(handleError()),
-      invoice: {
-        get: async (orderId: string) =>
-          fetchWithJWT(ROUTES.payments.invoice.get.replace(':order_id', orderId), {
-            headers: getDefaultHeaders(),
-          })
-            .then(checkStatus)
-            .catch(handleError()),
-      },
-    },
   };
 };
 

@@ -1,12 +1,12 @@
+import { Children } from 'react';
 import { useIntl } from 'react-intl';
-import * as Joanie from 'types/Joanie';
+import type * as Joanie from 'types/Joanie';
 
 export interface CourseRunListProps {
-  baseKey: string;
   courseRuns: Joanie.CourseRun[];
 }
 
-const CourseRunList = ({ baseKey, courseRuns }: CourseRunListProps) => {
+const CourseRunList = ({ courseRuns }: CourseRunListProps) => {
   const intl = useIntl();
 
   const formatDate = (date: string) =>
@@ -18,20 +18,19 @@ const CourseRunList = ({ baseKey, courseRuns }: CourseRunListProps) => {
 
   return (
     <ol className="course-runs-list">
-      {courseRuns.map((courseRun) => (
-        <li
-          key={`${baseKey}-${courseRun.id}`}
-          className="course-runs-item course-runs-item--inactive"
-        >
-          <em className="course-runs-item__date course-runs-item__date--start">
-            {formatDate(courseRun.start)}
-          </em>
-          <span className="course-runs-item__date-separator" />
-          <em className="course-runs-item__date course-runs-item__date--end">
-            {formatDate(courseRun.end)}
-          </em>
-        </li>
-      ))}
+      {Children.toArray(
+        courseRuns.map((courseRun) => (
+          <li className="course-runs-item course-runs-item--inactive">
+            <em className="course-runs-item__date course-runs-item__date--start">
+              {formatDate(courseRun.start)}
+            </em>
+            <span className="course-runs-item__date-separator" />
+            <em className="course-runs-item__date course-runs-item__date--end">
+              {formatDate(courseRun.end)}
+            </em>
+          </li>
+        )),
+      )}
     </ol>
   );
 };
