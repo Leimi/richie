@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { defineMessages, FormattedMessage } from 'react-intl';
+import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
 
 import { CommonDataProps } from 'types/commonDataProps';
 import { Course } from 'types/Course';
@@ -15,9 +15,18 @@ const messages = defineMessages({
     description: 'Placeholder text when the course we are glimpsing at is missing a cover image',
     id: 'components.CourseGlimpse.cover',
   },
+  organizationIconAlt: {
+    defaultMessage: 'Organization',
+    description: 'Organization logo alternative text for screen reader users'
+  },
+  codeIconAlt: {
+    defaultMessage: 'Course code',
+    description: 'Course code logo alternative text for screen reader users'
+  }
 });
 
-const CourseGlimpseBase = ({ context, course }: CourseGlimpseProps & CommonDataProps) => (
+const CourseGlimpseBase = ({ context, course }: CourseGlimpseProps & CommonDataProps) => {
+  const 
   <a className="course-glimpse course-glimpse--link" href={course.absolute_url}>
     <div className="course-glimpse__media">
       {/* alt forced to empty string because it's a decorative image */}
@@ -66,15 +75,15 @@ const CourseGlimpseBase = ({ context, course }: CourseGlimpseProps & CommonDataP
           </div>
         ) : null}
         <div className="course-glimpse__metadata course-glimpse__metadata--organization">
-          <svg aria-hidden={true} role="img" className="icon">
+          <svg aria-label="" role="img" className="icon">
             <use xlinkHref="#icon-org" />
           </svg>
-          <span className="title" title={course.organization_highlighted}>
+          <span className="title">
             {course.organization_highlighted}
           </span>
         </div>
         <div className="course-glimpse__metadata course-glimpse__metadata--code">
-          <svg aria-hidden={true} role="img" className="icon">
+          <svg aria-label=role="img" className="icon">
             <use xlinkHref="#icon-barcode" />
           </svg>
           <span>{course.code || '-'}</span>
