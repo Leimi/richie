@@ -319,6 +319,11 @@ $glimpse-gutter: 0.6rem;
     border-bottom: $onepixel solid r-theme-val(blogpost-glimpse-mini, border);
   }
 
+  &__link {
+    color: inherit;
+    text-decoration: none;
+  }
+
   &__media {
     @include sv-flex(1, 0, 8.25rem);
     img {

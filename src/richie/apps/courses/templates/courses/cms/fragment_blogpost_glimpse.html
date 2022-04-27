@@ -34,8 +34,9 @@
         </div>
     </div>
 {% elif blogpost_variant == "mini" %}
-    <a href="{{ blogpost_page.get_absolute_url }}" class="blogpost-{{ blogpost_variant }}{% if blogpost_page.publisher_is_draft %} blogpost-{{ blogpost_variant }}--draft{% endif %}">
-        <div class="blogpost-{{ blogpost_variant }}__media">
+    <div class="blogpost-{{ blogpost_variant }}{% if blogpost_page.publisher_is_draft %} blogpost-{{ blogpost_variant }}--draft{% endif %}">
+        <div class="blogpost-{{ blogpost_variant }}__media" aria-hidden="true">
+            <a href="{{ blogpost_page.get_absolute_url }}" tabindex="-1">
                 {% get_placeholder_plugins "cover" blogpost_page as plugins or %}
                     <div class="blogpost-{{ blogpost_variant }}__empty">{% trans 'Cover' %}</div>
                 {% endget_placeholder_plugins %}
@@ -50,6 +51,7 @@
                         alt=""
                     />
                 {% endblockplugin %}
+            </a>
         </div>
         <div class="blogpost-{{ blogpost_variant }}__content">
             <div class="blogpost-{{ blogpost_variant }}__wrapper">
@@ -59,10 +61,15 @@
                         {% show_placeholder "categories" blogpost_page %}
                     {% endwith %}
                 </div>
-                <h{{ header_level|default:3 }} class="blogpost-{{ blogpost_variant }}__title">{{ blogpost_page.get_title }}</h{{ header_level|default:3 }}>
+
+                <h{{ header_level|default:3 }} class="blogpost-{{ blogpost_variant }}__title">
+                    <a href="{{ blogpost.extended_object.get_absolute_url }}" class="blogpost-{{ blogpost_variant }}__link">
+                        {{ blogpost_page.get_title }}
+                    </a>
+                </h{{ header_level|default:3 }}>
             </div>
         </div>
-                    </a>
+    </div>
 {% else %}
     <div class="blogpost-{{ blogpost_variant }}{% if blogpost_page.publisher_is_draft %} blogpost-{{ blogpost_variant }}--draft{% endif %}">
         {% comment %} sighted users see the date above the cover image, not announced to screen readers{% endcomment %}
