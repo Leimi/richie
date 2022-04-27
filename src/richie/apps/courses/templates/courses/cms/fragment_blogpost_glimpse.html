@@ -55,18 +55,18 @@
         </div>
         <div class="blogpost-{{ blogpost_variant }}__content">
             <div class="blogpost-{{ blogpost_variant }}__wrapper">
+                <h{{ header_level|default:3 }} class="blogpost-{{ blogpost_variant }}__title">
+                    <a href="{{ blogpost.extended_object.get_absolute_url }}" class="blogpost-{{ blogpost_variant }}__link">
+                        {{ blogpost_page.get_title }}
+                    </a>
+                </h{{ header_level|default:3 }}>
+
                 <div class="blogpost-{{ blogpost_variant }}__categories">
                     {% with category_variant="tag" has_link=False %}
                         <p class="offscreen">{% trans "Categories" %}</p>
                         {% show_placeholder "categories" blogpost_page %}
                     {% endwith %}
                 </div>
-
-                <h{{ header_level|default:3 }} class="blogpost-{{ blogpost_variant }}__title">
-                    <a href="{{ blogpost.extended_object.get_absolute_url }}" class="blogpost-{{ blogpost_variant }}__link">
-                        {{ blogpost_page.get_title }}
-                    </a>
-                </h{{ header_level|default:3 }}>
             </div>
         </div>
     </div>
